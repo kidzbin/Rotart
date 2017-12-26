@@ -7,8 +7,6 @@
 
 uint32_t t = 0;
 
-uint8_t Stat,LastStat;
-
 typedef struct {
 		uint8_t LayerCtrl;
 		uint8_t LayerItem[2];
@@ -18,7 +16,8 @@ typedef struct {
 
 _ScreenStat ScreenStat;
 
-void setup() {
+void setup() 
+{
   Serial.begin(SERIAL_BAUDRATE);
 
   attachInterrupt(interruptA, rotaryEncoderChanged, CHANGE  );
@@ -26,15 +25,12 @@ void setup() {
   pinMode(DT_PIN, INPUT); 
   pinMode(SW_PIN, INPUT); 
 
-  LastStat  = digitalRead(CLK_PIN);
-
   ScreenStat.LayerCtrl    = 0;
   ScreenStat.LayerItem[0] = 0;
   ScreenStat.LayerItem[1] = 0;
   ScreenStat.Max          = 30;
   ScreenStat.Min          = 5;
   ScreenStat.Show         = 1;
-
 }
 
 void loop() 
@@ -56,20 +52,18 @@ void loop()
     Item  = ScreenStat.LayerItem[0]%2 ;
     if( Layer == 0)
     {
-      if( Item == 0)
-      {
-          Serial.print  (" > Max = ");
-          Serial.println(ScreenStat.Max);
-          Serial.print  ("   Min = ");
-          Serial.println(ScreenStat.Min);
-      }
-      else
-      {
-          Serial.print  ("   Max = ");
-          Serial.println(ScreenStat.Max);
-          Serial.print  (" > Min = ");
-          Serial.println(ScreenStat.Min);
-      }
+        if(Item==0x00)
+          Serial.print  ("> ");
+        else
+          Serial.print  ("  ");
+        Serial.print  ("Max = ");
+        Serial.println(ScreenStat.Max);        
+        if(Item==0x01)
+          Serial.print  ("> ");
+        else
+          Serial.print  ("  ");
+        Serial.print  ("Min = ");
+        Serial.println(ScreenStat.Min);            
       Serial.println("");
     }
     else //Layer 1
@@ -95,8 +89,8 @@ void rotaryEncoderChanged()
   uint8_t Layer,Item;
   int8_t  cnt;
 
-  unsigned long temp = millis();
-  if(temp - t < 100) // 去彈跳
+  uint32_t temp = millis();
+  if(temp - t < 100)
     return;
   t = temp;
 
@@ -105,7 +99,6 @@ void rotaryEncoderChanged()
   cnt = (a!=b)?1:-1;
 
   Layer = ScreenStat.LayerCtrl%2;
-  Item  = ScreenStat.LayerItem[0]%2;
 
   if(Layer == 0) //First Layer
   {
@@ -113,6 +106,7 @@ void rotaryEncoderChanged()
   }
   else           //Second Layer
   {
+    Item  = ScreenStat.LayerItem[0]%2;
     if(Item == 0)
     {
       ScreenStat.Max+=cnt;
@@ -124,5 +118,4 @@ void rotaryEncoderChanged()
   }
 
   ScreenStat.Show = 1;
-  //Serial.println(ScreenStat.LayerCtrl);
 }
