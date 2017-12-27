@@ -1,5 +1,4 @@
-#define SERIAL_BAUDRATE 9600
-#define CLK_PIN D2 // 定義連接腳位
+#define CLK_PIN D2
 #define DT_PIN  D3
 #define SW_PIN  D4
 
@@ -16,9 +15,9 @@ typedef struct {
 
 _ScreenStat ScreenStat;
 
-void setup() 
+void setup()
 {
-  Serial.begin(SERIAL_BAUDRATE);
+  Serial.begin(9600);
 
   attachInterrupt(interruptA, rotaryEncoderChanged, CHANGE  );
   pinMode(CLK_PIN, INPUT);
@@ -33,9 +32,9 @@ void setup()
   ScreenStat.Show         = 1;
 }
 
-void loop() 
+void loop()
 {
-  uint8_t Layer,Item;
+  uint8_t Layer;
 
   if(digitalRead(SW_PIN) == LOW)
   {
@@ -46,43 +45,17 @@ void loop()
     ScreenStat.Show = 1;
   }
 
-  if(ScreenStat.Show)
-  {
-    Layer = ScreenStat.LayerCtrl%2;
-    Item  = ScreenStat.LayerItem[0]%2 ;
-    if( Layer == 0)
-    {
-        if(Item==0x00)
-          Serial.print  ("> ");
-        else
-          Serial.print  ("  ");
-        Serial.print  ("Max = ");
-        Serial.println(ScreenStat.Max);        
-        if(Item==0x01)
-          Serial.print  ("> ");
-        else
-          Serial.print  ("  ");
-        Serial.print  ("Min = ");
-        Serial.println(ScreenStat.Min);            
-      Serial.println("");
-    }
-    else //Layer 1
-    {
-      if( Item == 0 )                    //Set Max
-      {
-          Serial.print(" Set Max  = ");
-          Serial.println(ScreenStat.Max);
-      }
-      else                               //Set Min
-      {
-          Serial.print(" Set Min  = ");
-          Serial.println(ScreenStat.Min);
-      }
-    }
-    ScreenStat.Show = 0;
-  }
+  //Show Screen
+  ShowScreen();
+/*
+  if(temp>=Max)
+    //Power On
 
+  if(temp<=Min)
+    //Break down power
+*/
 }
+
 void rotaryEncoderChanged()
 {
   uint8_t a,b;
@@ -118,4 +91,46 @@ void rotaryEncoderChanged()
   }
 
   ScreenStat.Show = 1;
+}
+
+void ShowScreen(void)
+{
+  uint8_t Layer,Item;
+ 
+  if(ScreenStat.Show)
+  {
+    Layer = ScreenStat.LayerCtrl%2;
+    Item  = ScreenStat.LayerItem[0]%2;
+  
+    if( Layer == 0 )
+    {
+        if(Item==0x00)
+          Serial.print  ("> ");
+        else
+          Serial.print  ("  ");
+        Serial.print  ("Max = ");
+        Serial.println(ScreenStat.Max);
+        if(Item==0x01)
+          Serial.print  ("> ");
+        else
+          Serial.print  ("  ");
+        Serial.print  ("Min = ");
+        Serial.println(ScreenStat.Min);
+      Serial.println("");
+    }
+    else //Layer 1
+    {
+      if( Item == 0 )                    //Set Max
+      {
+          Serial.print(" Set Max  = ");
+          Serial.println(ScreenStat.Max);
+      }
+      else                               //Set Min
+      {
+          Serial.print(" Set Min  = ");
+          Serial.println(ScreenStat.Min);
+      }
+    }
+    ScreenStat.Show = 0;
+  }
 }
